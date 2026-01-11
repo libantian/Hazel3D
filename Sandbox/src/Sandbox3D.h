@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Hazel.h>
-#include "Platform/OpenGL/OpenGLShader.h"
 
 #include "imgui/imgui.h"
 

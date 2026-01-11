@@ -1,6 +1,5 @@
 #include "hzpch.h"
 #include "Material.h"
-#include "Platform/OpenGL/OpenGLShader.h"
 
 namespace Hazel {
 
