@@ -3,6 +3,7 @@
 
 #include "Hazel/Input.h"
 #include "Hazel/KeyCodes.h"
+#include "Hazel/Window.h"
 
 namespace Hazel {
 	OrthographicCameraController::OrthographicCameraController(float aspectRatio, bool rotation)
@@ -14,14 +15,14 @@ namespace Hazel {
 	{
 
 		if (Hazel::Input::IsKeyPressed(HZ_KEY_LEFT))
-			m_CameraPosition.x -= m_CameraTranslationSpeed * ts;
+			m_CameraPosition.x -= m_CameraTranslationSpeed * m_ZoomLevel * ts;
 		else if (Hazel::Input::IsKeyPressed(HZ_KEY_RIGHT))
-			m_CameraPosition.x += m_CameraTranslationSpeed * ts;
+			m_CameraPosition.x += m_CameraTranslationSpeed * m_ZoomLevel * ts;;
 
 		if (Hazel::Input::IsKeyPressed(HZ_KEY_UP))
-			m_CameraPosition.y += m_CameraTranslationSpeed * ts;
+			m_CameraPosition.y += m_CameraTranslationSpeed * m_ZoomLevel * ts;
 		else if (Hazel::Input::IsKeyPressed(HZ_KEY_DOWN))
-			m_CameraPosition.y -= m_CameraTranslationSpeed * ts;
+			m_CameraPosition.y -= m_CameraTranslationSpeed * m_ZoomLevel * ts;
 		if (m_Rotation) 
 		{
 			if (Hazel::Input::IsKeyPressed(HZ_KEY_A))
@@ -46,7 +47,7 @@ namespace Hazel {
 	bool OrthographicCameraController::OnMouseScrolled(MouseScrolledEvent& e)
 	{
 		m_ZoomLevel -= 0.1 * e.GetYOffset();
-		m_ZoomLevel = std::max(std::min(MAX_ZOOM_LEVEL, m_ZoomLevel), MIN_ZOOM_LEVEL);
+		ClampZoomLevel();
 		m_Camera.SetProjection(
 			-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel,
 			-m_ZoomLevel, m_ZoomLevel
