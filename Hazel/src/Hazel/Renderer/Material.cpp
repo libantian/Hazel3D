@@ -13,4 +13,6 @@ namespace Hazel {
 		texture->Bind(slot);
 		m_Shader->Bind();
 	}
+
+
 }
