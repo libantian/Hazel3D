@@ -14,10 +14,9 @@ Sandbox3D::Sandbox3D() :
 
 void Sandbox3D::OnAttach()
 {
-	// vertex array
-	m_SquareVA = Hazel::VertexArray::Create();
-	// vertex buffer
-	float squareVertices[] = {
+	// box
+	// vertices buffer
+	float boxVertices[] = {
 		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
 		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
@@ -60,19 +59,24 @@ void Sandbox3D::OnAttach()
 		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
 		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 	};
-	Hazel::Ref<Hazel::VertexBuffer> squareVB;
-	squareVB = Hazel::VertexBuffer::Create(squareVertices, sizeof(squareVertices));
-	squareVB->SetLayout({
+	Hazel::Ref<Hazel::VertexBuffer> boxVB = Hazel::VertexBuffer::Create(boxVertices, sizeof(boxVertices));
+	boxVB->SetLayout({
 		{ Hazel::ShaderDataType::Float3, "a_Position" },
 		{ Hazel::ShaderDataType::Float2, "a_TexCoord" }
 		});
-	m_SquareVA->AddVertexBuffer(squareVB);
 	// index buffer
-	std::array<uint32_t, 36>squareIndices;
-	std::iota(std::begin(squareIndices), std::end(squareIndices), 0);
-	Hazel::Ref<Hazel::IndexBuffer> squareIB;
-	squareIB = Hazel::IndexBuffer::Create(squareIndices.data(), sizeof(squareIndices) / sizeof(uint32_t));
-	m_SquareVA->SetIndexBuffer(squareIB);
+	std::array<uint32_t, 36> boxIndices;
+	std::iota(std::begin(boxIndices), std::end(boxIndices), 0);
+	Hazel::Ref<Hazel::IndexBuffer> boxIB = Hazel::IndexBuffer::Create(boxIndices.data(), sizeof(boxIndices) / sizeof(uint32_t));
+	// vertices array
+	m_BoxVA = Hazel::VertexArray::Create();
+	m_BoxVA->AddVertexBuffer(boxVB);
+	m_BoxVA->SetIndexBuffer(boxIB);
+
+	// light source
+	m_LightVA = Hazel::VertexArray::Create();
+	m_LightVA->AddVertexBuffer(boxVB);
+	m_LightVA->SetIndexBuffer(boxIB);
 
 	// material
 	m_TexMaterial = Hazel::CreateRef<Hazel::Material>(Hazel::Renderer::GetShaderLib()->Get("Material"));
@@ -82,12 +86,10 @@ void Sandbox3D::OnAttach()
 
 void Sandbox3D::OnUpdate(Hazel::Timestep ts)
 {
-	// TODO(islander)
 	m_CameraController.OnUpdate(ts);
 
 	Hazel::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
 	Hazel::RenderCommand::Clear();
-
 
 	m_CameraController.SetPerspective(m_isPerspective);
 	float aspectRatio = (float)Hazel::DEFAULT_WINDOW_WIDTH / (float)Hazel::DEFAULT_WINDOW_HEIGHT;
@@ -105,18 +107,19 @@ void Sandbox3D::OnUpdate(Hazel::Timestep ts)
 		glm::vec3(1.5f,  0.2f, -1.5f),
 		glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
-	for (unsigned int i = 0;i < 10;i++) {
+	for (unsigned int i = 0; i < 10; i++)
+	{
 		glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), m_SquarePos);
 		modelMatrix = glm::translate(modelMatrix, cubePositions[i]);
 		float angle = 20.0f * i;
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
 		Hazel::Renderer::Submit(
-			m_SquareVA, m_TexMaterial,
+			m_BoxVA, m_TexMaterial,
 			modelMatrix
 		);
 	}
 	Hazel::Renderer::Submit(
-		m_SquareVA, m_TexMaterial,
+		m_BoxVA, m_TexMaterial,
 		glm::translate(glm::mat4(1.0f), m_SquarePos)
 	);
 	Hazel::Renderer::EndScene();
@@ -124,17 +127,17 @@ void Sandbox3D::OnUpdate(Hazel::Timestep ts)
 
 void Sandbox3D::OnImGuiRender()
 {
+
 	ImGui::Begin("Scene Settings");
 	ImGui::DragFloat3("Square Position", glm::value_ptr(m_SquarePos), 0.1f);
 	ImGui::End();
 
 	ImGui::Begin("Camera Status");
 	ImGui::Checkbox("Perspective", &m_isPerspective);
-	
-	// show the current camera position
+	// show the current camera state
 	const glm::vec3& cameraPos = m_CameraController.GetCamera().GetPosition();
 	ImGui::Text("Position: (%.1f, %.1f, %.1f)", cameraPos.x, cameraPos.y, cameraPos.z);
-	ImGui::Text("AspectRatio: %.2f,Fovy: %.1f,Zoom:%.1f", m_CameraController.GetAspectRatio(), m_CameraController.GetFovy(), m_CameraController.GetZoomLevel());
+	ImGui::Text("AspectRatio: %.2f, Fovy: %.1f, Zoom: %.1f", m_CameraController.GetAspectRatio(), m_CameraController.GetFovy(), m_CameraController.GetZoomLevel());
 	const glm::quat& cameraRotation = m_CameraController.GetCamera().GetRotation();
 	ImGui::Text("Rotation: %.2f + %.2fi + %.2fj + %.2fk (Norm: %.2f)", cameraRotation.w, cameraRotation.x, cameraRotation.y, cameraRotation.z, glm::length(cameraRotation));
 	const glm::vec3& cameraX = m_CameraController.GetCamera().GetXAxis();
