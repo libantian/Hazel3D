@@ -6,6 +6,7 @@
 #include "Shader.h"
 #include "Texture.h"
 #include "Material.h"
+#include "Light.h"
 
 namespace Hazel {
 
@@ -14,12 +15,12 @@ namespace Hazel {
 	public:
 		static void Init();
 		static void OnWindowResize(uint32_t width, uint32_t height);
-		
-		static void BeginScene(const Camera& camera);
+
+		static void BeginScene(const Camera& camera, const Light& globalLight);
 		static void EndScene();
 
 		static void Submit(
-			const Ref<VertexArray>& vertexArray, 
+			const Ref<VertexArray>& vertexArray,
 			const Ref<Material>& material,
 			const glm::mat4& modelTransform = glm::mat4(1.0f)
 		);
@@ -39,6 +40,5 @@ namespace Hazel {
 		static Ref<ShaderLibrary> s_ShaderLibrary;
 		static Ref<Texture2D> s_WhiteTexture2D;
 	};
-	
-}
 
+}

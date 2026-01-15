@@ -31,6 +31,11 @@ namespace Hazel {
 		{ 
 			s_RendererAPI->DrawIndexed(elementCount);
 		}
+
+		inline static void Draw(int first, uint32_t elementCount)
+		{
+			s_RendererAPI->Draw(first, elementCount);
+		}
 	private:
 		static RendererAPI* s_RendererAPI;
 	};
