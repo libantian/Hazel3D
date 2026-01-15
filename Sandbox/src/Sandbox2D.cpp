@@ -12,9 +12,15 @@ Sandbox2D::Sandbox2D()
 
 void Sandbox2D::OnAttach()
 {
-	Hazel::Renderer2D::Init();
+	m_TexMaterial = Hazel::CreateRef<Hazel::Material>(Hazel::Renderer::GetShaderLib()->Get("Material"));
+	auto texture = Hazel::Texture2D::Create("Sandbox/assets/textures/laugh.png");
+	m_TexMaterial->SetTexture(texture);
 
-	m_Texture = Hazel::Texture2D::Create("assets/textures/laugh.png");
+	m_ColorMaterial = Hazel::CreateRef<Hazel::Material>(Hazel::Renderer::GetShaderLib()->Get("Material"));
+
+	m_MixedMaterial = Hazel::CreateRef<Hazel::Material>(Hazel::Renderer::GetShaderLib()->Get("Material"));
+	texture = Hazel::Texture2D::Create("Sandbox/assets/textures/container.png");
+	m_MixedMaterial->SetTexture(texture);
 }
 
 void Sandbox2D::OnDetach()
@@ -32,9 +38,11 @@ void Sandbox2D::OnUpdate(Hazel::Timestep ts)
 	Hazel::RenderCommand::Clear();
 
 	Hazel::Renderer2D::BeginScene(m_CameraController.GetCamera());
-	Hazel::Renderer2D::DrawQuad({ 0.0f, 0.0f }, { 1.0f, 1.0f }, m_SquareColor);
-	Hazel::Renderer2D::DrawQuad({ -1.0f, 0.5f }, { 0.4f, 0.8f }, { 0.2f, 0.8f, 0.3f, 1.0f });
-	Hazel::Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 2.0f, 2.0f }, m_Texture);
+	m_MixedMaterial->SetColor(m_SquareColor, 0.5);
+	Hazel::Renderer2D::DrawQuad({ 0.0f, 0.0f }, { 1.0f, 1.0f }, m_MixedMaterial);
+	m_ColorMaterial->SetColor(m_SquareColor);
+	Hazel::Renderer2D::DrawQuad({ -1.0f, 0.5f }, { 0.4f, 0.8f }, m_ColorMaterial);
+	Hazel::Renderer2D::DrawQuad({ 0.0f, 0.0f, -0.1f }, { 2.0f, 2.0f }, m_TexMaterial);
 	Hazel::Renderer2D::EndScene();
 }
 

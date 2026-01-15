@@ -6,39 +6,42 @@
 #include "Hazel/Core/Window.h"
 
 namespace Hazel {
+
 	OrthographicCameraController::OrthographicCameraController(float aspectRatio, bool rotation)
-		:m_AspectRatio(aspectRatio),m_Camera(-m_AspectRatio*m_ZoomLevel,m_AspectRatio*m_ZoomLevel,-m_ZoomLevel,m_ZoomLevel),m_Rotation(rotation)
+		: m_AspectRatio(aspectRatio), m_Camera(
+			-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel,
+			-m_ZoomLevel, m_ZoomLevel
+		), m_Rotation(rotation)
 	{
 	}
 
 	void OrthographicCameraController::OnUpdate(Timestep ts)
 	{
-
-		if (Hazel::Input::IsKeyPressed(HZ_KEY_LEFT))
+		if (Input::IsKeyPressed(HZ_KEY_A))
 			m_CameraPosition.x -= m_CameraTranslationSpeed * m_ZoomLevel * ts;
-		else if (Hazel::Input::IsKeyPressed(HZ_KEY_RIGHT))
-			m_CameraPosition.x += m_CameraTranslationSpeed * m_ZoomLevel * ts;;
+		else if (Input::IsKeyPressed(HZ_KEY_D))
+			m_CameraPosition.x += m_CameraTranslationSpeed * m_ZoomLevel * ts;
 
-		if (Hazel::Input::IsKeyPressed(HZ_KEY_UP))
+		if (Input::IsKeyPressed(HZ_KEY_W))
 			m_CameraPosition.y += m_CameraTranslationSpeed * m_ZoomLevel * ts;
-		else if (Hazel::Input::IsKeyPressed(HZ_KEY_DOWN))
-			m_CameraPosition.y -= m_CameraTranslationSpeed * m_ZoomLevel * ts;
-		if (m_Rotation) 
+		else if (Input::IsKeyPressed(HZ_KEY_S))
+			m_CameraPosition.y -= m_CameraTranslationSpeed * m_ZoomLevel  * ts;
+
+		if (m_Rotation)
 		{
-			if (Hazel::Input::IsKeyPressed(HZ_KEY_A))
+			if (Input::IsKeyPressed(HZ_KEY_Q))
 				m_CameraRotation += m_CameraRotationSpeed * ts;
-			else if (Hazel::Input::IsKeyPressed(HZ_KEY_D))
+			else if (Input::IsKeyPressed(HZ_KEY_E))
 				m_CameraRotation -= m_CameraRotationSpeed * ts;
 
 			m_Camera.SetRotation(m_CameraRotation);
 		}
+
 		m_Camera.SetPosition(m_CameraPosition);
-		
 	}
 
 	void OrthographicCameraController::OnEvent(Event& e)
 	{
-
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<MouseScrolledEvent>(HZ_BIND_EVENT_FN(OrthographicCameraController::OnMouseScrolled));
 		dispatcher.Dispatch<WindowResizeEvent>(HZ_BIND_EVENT_FN(OrthographicCameraController::OnWindowResized));
@@ -52,7 +55,6 @@ namespace Hazel {
 			-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel,
 			-m_ZoomLevel, m_ZoomLevel
 		);
-
 		return true;
 	}
 
@@ -65,4 +67,5 @@ namespace Hazel {
 		);
 		return true;
 	}
+
 }

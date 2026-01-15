@@ -44,7 +44,6 @@ project "Hazel"
 		"%{prj.name}/vendor/stb_image/**.cpp",
 		"%{prj.name}/vendor/glm/glm/**.hpp",
 		"%{prj.name}/vendor/glm/glm/**.inl",
-		"%{prj.name}/assets/shaders/**"
 	}
 
 	defines
@@ -59,8 +58,8 @@ project "Hazel"
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.ImGui}",
-		"%{IncludeDir.glm}",
-		"%{IncludeDir.stb_image}"
+		"%{IncludeDir.stb_image}",
+		"%{IncludeDir.glm}"
 	}
 
 	links 
@@ -80,7 +79,9 @@ project "Hazel"
 			"HZ_BUILD_DLL",
 			"GLFW_INCLUDE_NONE"
 		}
+
 		buildoptions { "/utf-8" }
+
 
 	filter "configurations:Debug"
 		defines "HZ_DEBUG"
@@ -106,8 +107,6 @@ project "Sandbox"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
-
-	debugdir "$(SolutionDir)"
 
 	files
 	{
@@ -137,6 +136,7 @@ project "Sandbox"
 		}
 
 		buildoptions { "/utf-8" }
+
 
 	filter "configurations:Debug"
 		defines "HZ_DEBUG"

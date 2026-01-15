@@ -1,5 +1,4 @@
 #pragma once
-#pragma once
 
 #define HZ_DEPTH_BUFFER_BIT 0x00000100
 #define HZ_STENCIL_BUFFER_BIT 0x00000400
