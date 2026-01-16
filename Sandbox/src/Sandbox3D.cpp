@@ -132,7 +132,7 @@ void Sandbox3D::OnAttach()
 	m_BoxMaterial->SetTexture(texture);
 
 	m_LightMaterial = Hazel::CreateRef<Hazel::Material>(Hazel::Renderer::GetShaderLib()->Get("Light"));
-	m_LightMaterial->SetColor(m_LightColor);
+	m_LightMaterial->SetTexture(Hazel::Texture2D::CreateFlatColor({ m_LightColor,1.0f}));
 }
 
 void Sandbox3D::OnUpdate(Hazel::Timestep ts)
@@ -144,7 +144,7 @@ void Sandbox3D::OnUpdate(Hazel::Timestep ts)
 
 	m_CameraController.SetPerspective(m_isPerspective);
 	m_Light->SetColor(m_LightColor);
-	m_LightMaterial->SetColor(m_LightColor);
+	m_LightMaterial->SetTexture(Hazel::Texture2D::CreateFlatColor({ m_LightColor,1.0f }));
 	m_Light->SetPosition(m_LightPos);
 	m_Light->SetIntensity(m_LightIntensity.ambient, m_LightIntensity.diffuse, m_LightIntensity.specular);
 
