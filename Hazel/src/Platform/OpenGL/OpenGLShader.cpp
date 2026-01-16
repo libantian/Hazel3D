@@ -79,6 +79,11 @@ namespace Hazel {
 		UploadUniformFloat4(name, value);
 	}
 
+	void OpenGLShader::SetMat3(const std::string& name, const glm::mat3& value)
+	{
+		UploadUniformMat3(name, value);
+	}
+
 	void OpenGLShader::SetMat4(const std::string& name, const glm::mat4& value)
 	{
 		UploadUniformMat4(name, value);
@@ -114,6 +119,17 @@ namespace Hazel {
 		glUniform4f(location, values.x, values.y, values.z, values.w);
 	}
 
+	void OpenGLShader::UploadUniformMat3(const std::string& name, const glm::mat3& matrix)
+	{
+		GLint location = glGetUniformLocation(m_RendererID, name.c_str());
+		glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
+	}
+
+	void OpenGLShader::UploadUniformMat4(const std::string& name, const glm::mat4& matrix)
+	{
+		GLint location = glGetUniformLocation(m_RendererID, name.c_str());
+		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
+	}
 	std::string OpenGLShader::ReadFile(const std::string& filepath)
 	{
 		std::string result;
@@ -210,9 +226,5 @@ namespace Hazel {
 		m_RendererID = program;
 	}
 
-	void OpenGLShader::UploadUniformMat4(const std::string& name, const glm::mat4& matrix)
-	{
-		GLint location = glGetUniformLocation(m_RendererID, name.c_str());
-		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
-	}
+
 }

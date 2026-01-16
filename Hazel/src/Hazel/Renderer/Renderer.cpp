@@ -23,13 +23,19 @@ namespace Hazel {
 		RenderCommand::SetViewport(0, 0, width, height);
 	}
 
-	void Renderer::BeginScene(const Camera& camera, const Light& globalLight)
+	void Renderer::BeginScene(const Camera& camera, const Light& light)
 	{
 		for (auto& [shaderName, shader] : Renderer::GetShaderLib()->GetShaders())
 		{
 			shader->Bind();
 			shader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
-			shader->SetFloat3("u_LightColor", globalLight.GetColor());
+			shader->SetFloat3("u_ViewPosition", light.GetPosition());
+
+			shader->SetFloat3("u_LightColor", light.GetColor());
+			shader->SetFloat3("u_LightPosition", light.GetPosition());
+			shader->SetFloat("u_LightAmbientIntensity", light.GetAmbientIntensity());
+			shader->SetFloat("u_LightDiffuseIntensity", light.GetDiffuseIntensity());
+			shader->SetFloat("u_LightSpecularIntensity", light.GetSpecularIntensity());
 		}
 	}
 
@@ -45,7 +51,8 @@ namespace Hazel {
 	{
 		material->Bind();
 		material->GetShader()->SetMat4("u_Transform", modelTransform);
-
+		glm::mat3 modelTransformNormal = glm::transpose(glm::mat3(modelTransform));
+		material->GetShader()->SetMat3("u_TransformNormal", modelTransform);
 		vertexArray->Bind();
 
 		if (vertexArray->GetIndexBuffer())

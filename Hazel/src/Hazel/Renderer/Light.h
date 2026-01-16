@@ -9,10 +9,15 @@ namespace Hazel {
 	class Light
 	{
 	public:
-		static Ref<Light> Create(const glm::vec3& color, const glm::vec3& position = glm::vec3(0.0f));
+		static Ref<Light> Create(
+			const glm::vec3& color, const glm::vec3& position = glm::vec3(0.0f),
+			float ambientIntensity = 0.1f, float diffuseIntensity = 1.0f, float specularIntensity = 0.5f
+		);
 	public:
-		Light(const glm::vec3& color, const glm::vec3& position = glm::vec3(0.0f))
-			: m_Color(color), m_Position(position)
+		Light(
+			const glm::vec3& color, const glm::vec3& position = glm::vec3(0.0f),
+			float ambientIntensity = 0.1f, float diffuseIntensity = 1.0f, float specularIntensity = 0.5f
+			): m_Color(color), m_Position(position),m_AmbientIntensity(ambientIntensity),m_DiffuseIntensity(diffuseIntensity),m_SpecularIntensity(specularIntensity)
 		{
 		}
 
@@ -25,9 +30,23 @@ namespace Hazel {
 
 		inline void SetPosition(const glm::vec3& position) { m_Position = position; }
 		inline void SetColor(const glm::vec3& color) { m_Color = color; }
+
+		inline float GetAmbientIntensity() const{ return m_AmbientIntensity; }
+		inline void SetAmbientIntensity(float ambientIntensity) { m_AmbientIntensity = ambientIntensity; }
+		inline float GetDiffuseIntensity() const { return m_DiffuseIntensity; }
+		inline void SetDiffuseIntensity(float DiffuseIntensity) { m_DiffuseIntensity = DiffuseIntensity; }
+		inline float GetSpecularIntensity() const { return m_SpecularIntensity; }
+		inline void SetSpecularIntensity(float SpecularIntensity) { m_SpecularIntensity = SpecularIntensity; }
+		inline void SetIntensity(float ambientIntensity, float diffuseIntensity, float specularIntensity)
+		{
+			m_AmbientIntensity = ambientIntensity;
+			m_DiffuseIntensity = diffuseIntensity;
+			m_SpecularIntensity = specularIntensity;
+		}
 	private:
 		glm::vec3 m_Color;
 		glm::vec3 m_Position;
+		float m_AmbientIntensity, m_DiffuseIntensity, m_SpecularIntensity;
 	};
 
 }

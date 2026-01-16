@@ -17,52 +17,53 @@ void Sandbox3D::OnAttach()
 	// box
 	// vertices buffer
 	float boxVertices[] = {
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
+			 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,  0.0f,  0.0f, -1.0f,
+			 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0.0f,  0.0f, -1.0f,
+			 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0.0f,  0.0f, -1.0f,
+			-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  0.0f, -1.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
 
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+			-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  0.0f,  1.0f,
+			 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,  0.0f,  0.0f,  1.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,  0.0f,  0.0f,  1.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,  0.0f,  0.0f,  1.0f,
+			-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,  0.0f,  0.0f,  1.0f,
+			-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  0.0f,  1.0f,
 
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+			-0.5f,  0.5f,  0.5f,  1.0f, 0.0f, -1.0f,  0.0f,  0.0f,
+			-0.5f,  0.5f, -0.5f,  1.0f, 1.0f, -1.0f,  0.0f,  0.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f, 1.0f, -1.0f,  0.0f,  0.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f, 1.0f, -1.0f,  0.0f,  0.0f,
+			-0.5f, -0.5f,  0.5f,  0.0f, 0.0f, -1.0f,  0.0f,  0.0f,
+			-0.5f,  0.5f,  0.5f,  1.0f, 0.0f, -1.0f,  0.0f,  0.0f,
 
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  1.0f,  0.0f,  0.0f,
+			 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  1.0f,  0.0f,  0.0f,
+			 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  1.0f,  0.0f,  0.0f,
+			 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  1.0f,  0.0f,  0.0f,
+			 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  1.0f,  0.0f,  0.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  1.0f,  0.0f,  0.0f,
 
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  0.0f, -1.0f,  0.0f,
+			 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,  0.0f, -1.0f,  0.0f,
+			 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,  0.0f, -1.0f,  0.0f,
+			 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,  0.0f, -1.0f,  0.0f,
+			-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  0.0f, -1.0f,  0.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  0.0f, -1.0f,  0.0f,
 
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+			-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  1.0f,  0.0f,
+			 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0.0f,  1.0f,  0.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  0.0f,  1.0f,  0.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  0.0f,  1.0f,  0.0f,
+			-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  1.0f,  0.0f,
+			-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  1.0f,  0.0f
 	};
 	Hazel::Ref<Hazel::VertexBuffer> boxVB = Hazel::VertexBuffer::Create(boxVertices, sizeof(boxVertices));
 	boxVB->SetLayout({
 		{ Hazel::ShaderDataType::Float3, "a_Position" },
-		{ Hazel::ShaderDataType::Float2, "a_TexCoord" }
+		{ Hazel::ShaderDataType::Float2, "a_TexCoord" },
+		{ Hazel::ShaderDataType::Float3, "a_Noraml"}
 		});
 	// vertices array
 	m_BoxVA = Hazel::VertexArray::Create();
@@ -120,7 +121,10 @@ void Sandbox3D::OnAttach()
 	m_LightVA = Hazel::VertexArray::Create();
 	m_LightVA->AddVertexBuffer(lightVB);
 
-	m_Light = Hazel::Light::Create(m_LightColor);
+	m_Light = Hazel::Light::Create(
+		m_LightColor,m_LightPos,
+		m_LightIntensity.ambient,m_LightIntensity.diffuse,m_LightIntensity.specular
+	);
 
 	// material
 	m_BoxMaterial = Hazel::CreateRef<Hazel::Material>(Hazel::Renderer::GetShaderLib()->Get("Material"));
@@ -135,13 +139,14 @@ void Sandbox3D::OnUpdate(Hazel::Timestep ts)
 {
 	m_CameraController.OnUpdate(ts);
 
-	Hazel::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
+	Hazel::RenderCommand::SetClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
 	Hazel::RenderCommand::Clear();
 
 	m_CameraController.SetPerspective(m_isPerspective);
 	m_Light->SetColor(m_LightColor);
 	m_LightMaterial->SetColor(m_LightColor);
 	m_Light->SetPosition(m_LightPos);
+	m_Light->SetIntensity(m_LightIntensity.ambient, m_LightIntensity.diffuse, m_LightIntensity.specular);
 
 	Hazel::Renderer::BeginScene(m_CameraController.GetCamera(), *m_Light);
 	glm::vec3 cubePositions[] = {
@@ -188,6 +193,7 @@ void Sandbox3D::OnImGuiRender()
 	ImGui::Begin("Scene Settings");
 	ImGui::SliderFloat3("Global Light Color", glm::value_ptr(m_LightColor), 0.0f, 1.0f);
 	ImGui::DragFloat3("Light Position", glm::value_ptr(m_LightPos), 0.1f);
+	ImGui::SliderFloat3("Light Intensity", reinterpret_cast<float*>(&m_LightIntensity), 0.0f, 1.0f);
 	ImGui::DragFloat3("Boxes Position", glm::value_ptr(m_BoxPos), 0.1f);
 	ImGui::End();
 
