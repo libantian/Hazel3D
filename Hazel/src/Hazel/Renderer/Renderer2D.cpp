@@ -8,7 +8,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace Hazel {
-	
+
 	struct Renderer2DStorage
 	{
 		Ref<VertexArray> QuadVertexArray;
@@ -21,7 +21,7 @@ namespace Hazel {
 		RenderCommand::Init();
 
 		s_Data = new Renderer2DStorage();
-		
+
 		s_Data->QuadVertexArray = Hazel::VertexArray::Create();
 
 		float squareVertices[4 * 5] = {
@@ -35,14 +35,13 @@ namespace Hazel {
 		squareVB->SetLayout({
 			{ Hazel::ShaderDataType::Float3, "a_Position" },
 			{ Hazel::ShaderDataType::Float2, "a_TexCoord" }
-		});
+			});
 		s_Data->QuadVertexArray->AddVertexBuffer(squareVB);
 
 		uint32_t squareIndices[] = { 0, 1, 2, 2, 3, 0 };
 		Hazel::Ref<Hazel::IndexBuffer> squareIB;
 		squareIB = Hazel::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t));
 		s_Data->QuadVertexArray->SetIndexBuffer(squareIB);
-		
 	}
 
 	void Renderer2D::Shutdown()
@@ -81,8 +80,9 @@ namespace Hazel {
 
 	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<Material>& material)
 	{
-		material->Bind();
-		SetPosSize(material->GetShader(), position, size);
+		// TODO(islander): remove material for 2D
+		//material->Bind();
+		//SetPosSize(material->GetShader(), position, size);
 
 		s_Data->QuadVertexArray->Bind();
 		RenderCommand::DrawIndexed(s_Data->QuadVertexArray->GetIndexBuffer()->GetCount());

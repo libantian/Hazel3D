@@ -24,15 +24,18 @@ namespace Hazel {
 			const Ref<Material>& material,
 			const glm::mat4& modelTransform = glm::mat4(1.0f)
 		);
-		//submit a light source to draw
+		// submit a light source to draw
 		static void Submit(
 			const Ref<VertexArray>& vertexArray,
 			const Ref<Light>& light,
 			const glm::mat4& modelTransform = glm::mat4(1.0f)
 		);
+
 		inline static RendererAPI::API GetAPI() { return RendererAPI::GetAPI(); }
 
 		inline static Ref<ShaderLibrary> GetShaderLib() { return s_ShaderLibrary; }
+	private:
+		static void DrawVertexArray(const Ref<VertexArray>& vertexArray);
 	private:
 		struct SceneData
 		{

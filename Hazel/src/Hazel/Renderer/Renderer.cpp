@@ -13,7 +13,6 @@ namespace Hazel {
 
 		s_ShaderLibrary->Load("Hazel/assets/shaders/Material");
 		s_ShaderLibrary->Load("Hazel/assets/shaders/Light");
-
 	}
 
 	void Renderer::OnWindowResize(uint32_t width, uint32_t height)
@@ -27,7 +26,7 @@ namespace Hazel {
 		{
 			shader->Bind();
 			shader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
-			shader->SetFloat3("u_ViewPosition", light.GetPosition());
+			shader->SetFloat3("u_ViewPosition", camera.GetPosition());
 
 			shader->SetFloat3("u_Light.color", light.GetColor());
 			shader->SetFloat3("u_Light.position", light.GetPosition());
@@ -47,31 +46,27 @@ namespace Hazel {
 		const glm::mat4& modelTransform
 	)
 	{
-		material->Bind();
-		material->GetShader()->SetMat4("u_Transform", modelTransform);
-		glm::mat3 modelTransformNormal = glm::transpose(glm::mat3(modelTransform));
-		material->GetShader()->SetMat3("u_TransformNormal", modelTransform);
-		vertexArray->Bind();
+		auto shader = Hazel::Renderer::GetShaderLib()->Get("Material");
+		material->Bind(shader);
+		shader->SetMat4("u_Transform", modelTransform);
+		// TODO(islander): validate
+		glm::mat3 modelTransformNormal = glm::transpose(glm::inverse(glm::mat3(modelTransform)));
+		shader->SetMat3("u_TransformNormal", modelTransformNormal);
 
-		if (vertexArray->GetIndexBuffer())
-		{
-			RenderCommand::DrawIndexed(vertexArray->GetIndexBuffer()->GetCount());
-		}
-		else
-		{
-			RenderCommand::Draw(0, vertexArray->GetVertexCount());
-		}
+		DrawVertexArray(vertexArray);
 	}
-	
-	void Renderer::Submit(
-		const Ref<VertexArray>& vertexArray,
-		const Ref<Light>& Light,
-		const glm::mat4& modelTransform
-	)
+
+	void Renderer::Submit(const Ref<VertexArray>& vertexArray, const Ref<Light>& light, const glm::mat4& modelTransform)
 	{
 		auto shader = Hazel::Renderer::GetShaderLib()->Get("Light");
 		shader->Bind();
 		shader->SetMat4("u_Transform", modelTransform);
+
+		DrawVertexArray(vertexArray);
+	}
+
+	void Renderer::DrawVertexArray(const Ref<VertexArray>& vertexArray)
+	{
 		vertexArray->Bind();
 
 		if (vertexArray->GetIndexBuffer())

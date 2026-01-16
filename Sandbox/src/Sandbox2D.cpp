@@ -17,7 +17,6 @@ void Sandbox2D::OnAttach()
 	m_BoxMaterial->SetDiffuseMap(texture);
 
 	m_ColorMaterial = Hazel::CreateRef<Hazel::Material>(Hazel::Renderer::GetShaderLib()->Get("Material"));
-
 	m_ColorMaterial->SetDiffuseMap(Hazel::Texture2D::CreateFlatColor(m_SquareColor));
 }
 
