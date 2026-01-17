@@ -15,9 +15,15 @@ struct Light
     float diffuse;
     float specular;
     
+    //point light
     float constant;
     float liner;
     float quadratic;
+    
+    //spot light
+    vec3 direction;
+    float cutOff;
+    float outerCutOff;
 };
 uniform Light u_Light;
 //camera
@@ -33,16 +39,7 @@ struct Material
 uniform Material u_Material;
 void main()
 {
-    float dist = length(u_Light.position.xyz - v_FragPosotion);
-    float attenuation = 1.0 / (
-        u_Light.constant + u_Light.liner * dist + u_Light.quadratic *(dist*dist)
-    );
-    //ambient
-    vec4 diffuseColor = texture(u_Material.diffuse, v_TexCoord);
-    vec3 ambient = u_Light.ambient * u_Light.color * diffuseColor.rgb;
-    ambient *= attenuation;
-    //diffuse
-    vec3 normal = normalize(v_Normal);
+
     vec3 lightDir;
     if(u_Light.position.w == 0.0)
     {
@@ -56,9 +53,32 @@ void main()
         //TODO error
         lightDir = vec3(0.0);
     }
+    
+    float dist = length(u_Light.position.xyz - v_FragPosotion);
+    float attenuation = 1.0 / (
+        u_Light.constant + u_Light.liner * dist + u_Light.quadratic * (dist * dist)
+    );
+    
+    vec4 diffuseColor = texture(u_Material.diffuse, v_TexCoord);
+    
+    //ambient
+    vec3 ambient = u_Light.ambient * u_Light.color * diffuseColor.rgb;
+    ambient *= attenuation;
+    
+    //emission
+    vec3 emission = texture(u_Material.emission, v_TexCoord).rgb;
+    
+    // angle between light direction and fragment direction
+    float theta = dot(lightDir, normalize(-u_Light.direction));
+    float epsilon = u_Light.cutOff - u_Light.outerCutOff + 1e-7;
+    float spotIntensity = clamp((theta - u_Light.outerCutOff) / epsilon, 0.0, 1.0);
+    
+    //diffuse
+    vec3 normal = normalize(v_Normal);
     float diffuseIntensity = max(dot(normal, lightDir), 0.0);
     vec3 diffuse = u_Light.diffuse * u_Light.color * diffuseIntensity * diffuseColor.rgb;
     diffuse *= attenuation;
+    diffuse *= spotIntensity;
     
     //specular
     vec3 viewDir = normalize(u_ViewPosition - v_FragPosotion);
@@ -70,9 +90,7 @@ void main()
     * texture(u_Material.emission,v_TexCoord).rgb
     );
     specular *= attenuation;
-    
-    //emission
-    vec3 emission = texture(u_Material.emission, v_TexCoord).rgb;
+    diffuse *= spotIntensity;
     
     color = vec4(ambient + diffuse + specular+emission, 1.0);
 

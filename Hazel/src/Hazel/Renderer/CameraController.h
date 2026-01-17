@@ -59,7 +59,7 @@ namespace Hazel {
 
 		//---------------- camera speeds ---------------
 		float m_CameraTranslationSpeedXY = 0.01f;  // relative to pixel
-		float m_CameraTranslationSpeedZ = 0.1f;  // relative to scrolling
+		float m_CameraTranslationSpeedZ = 1.0f;  // relative to scrolling
 		float m_CameraRotationSpeedXY = 0.1f;
 
 		float m_ZoomSensitivity = 0.1f, m_ZoomMin = 0.1f;
