@@ -14,6 +14,10 @@ struct Light
     float ambient;
     float diffuse;
     float specular;
+    
+    float constant;
+    float liner;
+    float quadratic;
 };
 uniform Light u_Light;
 //camera
@@ -29,11 +33,14 @@ struct Material
 uniform Material u_Material;
 void main()
 {
-    vec4 diffuseColor = texture(u_Material.diffuse, v_TexCoord);
-    
+    float dist = length(u_Light.position.xyz - v_FragPosotion);
+    float attenuation = 1.0 / (
+        u_Light.constant + u_Light.liner * dist + u_Light.quadratic *(dist*dist)
+    );
     //ambient
+    vec4 diffuseColor = texture(u_Material.diffuse, v_TexCoord);
     vec3 ambient = u_Light.ambient * u_Light.color * diffuseColor.rgb;
-    
+    ambient *= attenuation;
     //diffuse
     vec3 normal = normalize(v_Normal);
     vec3 lightDir;
@@ -51,6 +58,7 @@ void main()
     }
     float diffuseIntensity = max(dot(normal, lightDir), 0.0);
     vec3 diffuse = u_Light.diffuse * u_Light.color * diffuseIntensity * diffuseColor.rgb;
+    diffuse *= attenuation;
     
     //specular
     vec3 viewDir = normalize(u_ViewPosition - v_FragPosotion);
@@ -61,6 +69,8 @@ void main()
     u_Light.specular * u_Light.color * specularIntensity 
     * texture(u_Material.emission,v_TexCoord).rgb
     );
+    specular *= attenuation;
+    
     //emission
     vec3 emission = texture(u_Material.emission, v_TexCoord).rgb;
     
