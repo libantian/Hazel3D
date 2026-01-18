@@ -5,23 +5,25 @@ layout(location = 0) out vec4 color;
 in vec2 v_TexCoord;
 in vec3 v_Normal;
 in vec3 v_FragPosotion;
-//camera
+
 uniform vec3 u_ViewPosition;
 
 struct DirectionalLight
 {
     vec3 direction;
     vec3 color;
+    
     float ambient;
     float diffuse;
     float specular;
 };
 uniform DirectionalLight u_DirectionalLight;
 
-struct Light
+struct PointLight
 {
-    vec4 position;
+    vec3 position;
     vec3 color;
+    
     float ambient;
     float diffuse;
     float specular;
@@ -30,13 +32,11 @@ struct Light
     float constant;
     float liner;
     float quadratic;
-    
-    //spot light
-    vec3 direction;
-    float cutOff;
-    float outerCutOff;
 };
-uniform Light u_Light;
+
+#define MAX_POINT_LIGHT 4
+uniform int u_PointLightCount = 0;
+uniform PointLight u_PointLights[MAX_POINT_LIGHT];
 
 //object attributes
 struct Material
@@ -71,6 +71,30 @@ vec3 CalcDirectionalLight(DirectionalLight light)
     vec3 specular = light.specular * light.color * specularIntensity * reflectColor.rgb;
     
     return ambient + diffuse + specular;
+}
+
+vec3 CalcPointLight(PointLight light)
+{
+    vec3 lightDir = normalize(light.position.xyz - v_FragPosotion);
+    
+    float dist = length(light.position.xyz - v_FragPosotion);
+    float attenuation = 1.0 / (
+        light.constant + light.liner * dist + light.quadratic * (dist * dist)
+    );
+    
+     //ambient
+    vec3 ambient = light.ambient * light.color * diffuseColor.rgb;
+    
+     //diffuse
+    float diffuseIntensity = max(dot(normal, lightDir), 0.0);
+    vec3 diffuse = light.diffuse * light.color * diffuseIntensity * diffuseColor.rgb;
+
+      //specular
+    vec3 reflectDir = reflect(-lightDir, normal);
+    float specularIntensity = pow(max(dot(viewDir, reflectDir), 0.0), u_Material.shininess);
+    vec3 specular = light.specular * light.color * specularIntensity * reflectColor.rgb;
+
+    return (ambient + diffuse + specular) * attenuation;
 }
 void main()
 {

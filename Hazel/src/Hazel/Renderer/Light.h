@@ -104,6 +104,8 @@ namespace Hazel {
 			m_Linear = linear;
 			m_Quadratic = quadratic;
 		}
+
+		void Bind(const Ref<Shader>& shader, int index);
 	private:
 		float m_Constant, m_Linear, m_Quadratic;
 		glm::vec3 m_Position;

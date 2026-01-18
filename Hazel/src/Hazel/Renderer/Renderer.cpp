@@ -20,7 +20,10 @@ namespace Hazel {
 		RenderCommand::SetViewport(0, 0, width, height);
 	}
 
-	void Renderer::BeginScene(const Camera& camera, const Ref<DirectionalLight>& directionalLight)
+	void Renderer::BeginScene(const Camera& camera, 
+		const Ref<DirectionalLight>& directionalLight,
+		const std::vector<Ref<PointLight>>& pointLights
+		)
 	{
 		for (auto& [shaderName, shader] : Renderer::GetShaderLib()->GetShaders())
 		{
@@ -32,6 +35,13 @@ namespace Hazel {
 			{
 				directionalLight->Bind(shader);
 			}
+			shader->SetInt("u_PointLightCount", pointLights.size());
+			for (int i = 0;i < pointLights.size();++i)
+			{
+				const auto& pointLight = pointLights[i];
+				pointLight->Bind(shader, i);
+			}
+
 			/*shader->SetFloat3("u_Light.color", light->GetColor());
 			shader->SetFloat4("u_Light.position", light->GetPosition());
 			shader->SetFloat("u_Light.ambient", light->GetAmbientIntensity());
@@ -83,6 +93,7 @@ namespace Hazel {
 		auto shader = Hazel::Renderer::GetShaderLib()->Get("Material");
 		material->Bind(shader);
 		shader->SetMat4("u_Transform", modelTransform);
+		
 		// TODO(islander): validate
 		glm::mat3 modelTransformNormal = glm::transpose(glm::inverse(glm::mat3(modelTransform)));
 		shader->SetMat3("u_TransformNormal", modelTransformNormal);
@@ -95,7 +106,7 @@ namespace Hazel {
 		auto shader = Hazel::Renderer::GetShaderLib()->Get("Light");
 		shader->Bind();
 		shader->SetMat4("u_Transform", modelTransform);
-
+		shader->SetFloat3("u_Color", light->GetColor());
 		DrawVertexArray(vertexArray);
 	}
 
