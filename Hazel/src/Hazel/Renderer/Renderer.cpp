@@ -20,15 +20,19 @@ namespace Hazel {
 		RenderCommand::SetViewport(0, 0, width, height);
 	}
 
-	void Renderer::BeginScene(const Camera& camera, const Ref<Light>& light)
+	void Renderer::BeginScene(const Camera& camera, const Ref<DirectionalLight>& directionalLight)
 	{
 		for (auto& [shaderName, shader] : Renderer::GetShaderLib()->GetShaders())
 		{
 			shader->Bind();
 			shader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
 			shader->SetFloat3("u_ViewPosition", camera.GetPosition());
-
-			shader->SetFloat3("u_Light.color", light->GetColor());
+			
+			if (directionalLight)
+			{
+				directionalLight->Bind(shader);
+			}
+			/*shader->SetFloat3("u_Light.color", light->GetColor());
 			shader->SetFloat4("u_Light.position", light->GetPosition());
 			shader->SetFloat("u_Light.ambient", light->GetAmbientIntensity());
 			shader->SetFloat("u_Light.diffuse", light->GetDiffuseIntensity());
@@ -62,7 +66,7 @@ namespace Hazel {
 				shader->SetFloat3("u_Light.direction", sLight->GetDirection());
 				shader->SetFloat("u_Light.cutOff", sLight->GetCutOff());
 				shader->SetFloat("u_Light.outerCutOff", sLight->GetOuterCutOff());
-			}
+			}*/
 		}
 	}
 

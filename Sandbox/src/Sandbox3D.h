@@ -28,17 +28,27 @@ private:
 	float m_BoxShininess = 32.0f;
 	glm::vec3 m_BoxPos = glm::vec3(0.0f, 0.0f, 0.0f);
 
+	Hazel::Ref<Hazel::DirectionalLight> m_DirectionalLight;
+	struct {
+		glm::vec3 direction = glm::vec3(-0.2f, -1.0f, -0.3f);
+		glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
+		float ambient = 0.1f;
+		float diffuse = 1.0f;
+		float specular = 1.0f;
+	}m_DirectionalLightProp;
 	Hazel::Ref<Hazel::Light> m_Light;
 	Hazel::Ref<Hazel::VertexArray>m_LightVA;
 	float m_LightCutOff = 12.5f;
 	Hazel::Ref<Hazel::Material>m_LightMaterial;
 	glm::vec3 m_LightColor = glm::vec3(1.0f, 1.0f, 1.0f);
 	glm::vec3 m_LightPos = glm::vec3(-0.2f, -1.0f, -0.3f);
+	
 	struct {
 		float constant = 1.0f;
 		float linear = 0.09f;
 		float quadratic = 0.032f;
 	}m_LightAttenuation;
+	
 	struct {
 		float ambient, diffuse, specular;
 	}m_LightIntensity = { 0.1f,1.0f,0.5f };
