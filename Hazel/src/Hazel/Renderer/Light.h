@@ -67,7 +67,7 @@ namespace Hazel {
 		inline const glm::vec3& GetDirection() const { return m_Direction; }
 		inline void SetDirection(const glm::vec3& direction) { m_Direction = direction; }
 
-		void Bind(const Ref<Shader>& shader);
+		void Bind(const Ref<Shader>& shader) const;
 	private:
 		glm::vec3 m_Direction;
 	};
@@ -105,7 +105,7 @@ namespace Hazel {
 			m_Quadratic = quadratic;
 		}
 
-		void Bind(const Ref<Shader>& shader, int index);
+		void Bind(const Ref<Shader>& shader, int index) const;
 	private:
 		float m_Constant, m_Linear, m_Quadratic;
 		glm::vec3 m_Position;
@@ -157,6 +157,8 @@ namespace Hazel {
 			m_CutOff = cutOff;
 			m_OuterCutOff = outerCutOff;
 		}
+
+		void Bind(const Ref<Shader>& shader) const;
 	private:
 		float m_CutOff, m_OuterCutOff;
 		float m_Constant, m_Linear, m_Quadratic;

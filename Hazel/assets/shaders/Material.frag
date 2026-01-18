@@ -38,6 +38,27 @@ struct PointLight
 uniform int u_PointLightCount = 0;
 uniform PointLight u_PointLights[MAX_POINT_LIGHT];
 
+struct SpotLight
+{
+    vec3 position;
+    vec3 direction;
+    vec3 color;
+    
+    float ambient;
+    float diffuse;
+    float specular;
+    
+    float constant;
+    float liner;
+    float quadratic;
+    
+    float cutOff;
+    float outerCutOff;
+};
+
+uniform int u_SpotLightCount = 0;
+uniform SpotLight u_SpotLight;
+
 //object attributes
 struct Material
 {
@@ -96,55 +117,55 @@ vec3 CalcPointLight(PointLight light)
 
     return (ambient + diffuse + specular) * attenuation;
 }
-void main()
+
+vec3 CalcSpotLight(SpotLight light)
 {
-/*
-    vec3 lightDir;
-    if(u_Light.position.w == 0.0)
-    {
-        lightDir = normalize(-u_Light.position.xyz);
-    }else if(u_Light.position.w == 1.0)
-    {
-        lightDir = normalize(u_Light.position.xyz - v_FragPosotion);
-    }
-    else
-    {
-        //TODO error
-        lightDir = vec3(0.0);
-    }
-    
-    float dist = length(u_Light.position.xyz - v_FragPosotion);
+    vec3 lightDir = normalize(light.position.xyz - v_FragPosotion);
+
+    float dist = length(light.position.xyz - v_FragPosotion);
     float attenuation = 1.0 / (
-        u_Light.constant + u_Light.liner * dist + u_Light.quadratic * (dist * dist)
+        light.constant + light.liner * dist + light.quadratic * (dist * dist)
     );
     
+    // angle between light direction and fragment direction
+    float theta = dot(lightDir, normalize(-light.direction));
+    float epsilon = light.cutOff - light.outerCutOff + 1e-7;
+    float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
     
     //ambient
-    vec3 ambient = u_Light.ambient * u_Light.color * diffuseColor.rgb;
-    ambient *= attenuation;
-    
-    
-    // angle between light direction and fragment direction
-    float theta = dot(lightDir, normalize(-u_Light.direction));
-    float epsilon = u_Light.cutOff - u_Light.outerCutOff + 1e-7;
-    float spotIntensity = clamp((theta - u_Light.outerCutOff) / epsilon, 0.0, 1.0);
-    
+    vec3 ambient = light.ambient * light.color * diffuseColor.rgb;
     //diffuse
     float diffuseIntensity = max(dot(normal, lightDir), 0.0);
-    vec3 diffuse = u_Light.diffuse * u_Light.color * diffuseIntensity * diffuseColor.rgb;
-    diffuse *= attenuation;
-    diffuse *= spotIntensity;
+    vec3 diffuse = light.diffuse * light.color * diffuseIntensity * diffuseColor.rgb;
     
     //specular
     vec3 reflectDir = reflect(-lightDir, normal);
     float specularIntensity = pow(max(dot(viewDir, reflectDir), 0.0), u_Material.shininess);
-    
-    specular *= attenuation;
-    diffuse *= spotIntensity;
-*/
-    vec3 emission = texture(u_Material.emission, v_TexCoord).rgb;
-    vec3 directionalColor = CalcDirectionalLight(u_DirectionalLight);
-    color = vec4(directionalColor + emission, 1.0);
+    vec3 specular = light.specular * light.color * specularIntensity * reflectColor.rgb;
 
-    color = min(color, vec4(1.0));
+    return (ambient + diffuse + specular) * attenuation * intensity;
+}
+void main()
+{
+
+    color = vec4(0.0, 0.0, 0.0, 1.0);
+    
+    vec3 directionalColor = CalcDirectionalLight(u_DirectionalLight);
+    color.rgb += directionalColor;
+    
+    for (int i = 0; i < min(u_PointLightCount, MAX_POINT_LIGHT); i++)
+    {
+        color.rgb += CalcPointLight(u_PointLights[i]);
+    }
+    
+    for (int i = 0; i < u_SpotLightCount; ++i)
+    {
+        color.rgb += CalcSpotLight(u_SpotLight);
+    }
+
+	// emission
+    vec3 emission = texture(u_Material.emission, v_TexCoord).rgb;
+    color.rgb += emission;
+
+        color = min(color, vec4(1.0));
 }

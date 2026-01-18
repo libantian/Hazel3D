@@ -22,7 +22,8 @@ namespace Hazel {
 
 	void Renderer::BeginScene(const Camera& camera, 
 		const Ref<DirectionalLight>& directionalLight,
-		const std::vector<Ref<PointLight>>& pointLights
+		const std::vector<Ref<PointLight>>& pointLights,
+		const Ref<SpotLight>& spotLight
 		)
 	{
 		for (auto& [shaderName, shader] : Renderer::GetShaderLib()->GetShaders())
@@ -35,6 +36,7 @@ namespace Hazel {
 			{
 				directionalLight->Bind(shader);
 			}
+
 			shader->SetInt("u_PointLightCount", pointLights.size());
 			for (int i = 0;i < pointLights.size();++i)
 			{
@@ -42,41 +44,11 @@ namespace Hazel {
 				pointLight->Bind(shader, i);
 			}
 
-			/*shader->SetFloat3("u_Light.color", light->GetColor());
-			shader->SetFloat4("u_Light.position", light->GetPosition());
-			shader->SetFloat("u_Light.ambient", light->GetAmbientIntensity());
-			shader->SetFloat("u_Light.diffuse", light->GetDiffuseIntensity());
-			shader->SetFloat("u_Light.specular", light->GetSpecularIntensity());
-			if (light->GetType() == Light::Directional)
+			if (spotLight)
 			{
-				shader->SetFloat("u_Light.constant", 1.0f);
-				shader->SetFloat("u_Light.linear", 0.0f);
-				shader->SetFloat("u_Light.quadratic", 0.0f);
-				shader->SetFloat3("u_Light.direction", { 1.0f,0.0f,0.0f });
-				shader->SetFloat("u_Light.cutOff", -1.0f);
-				shader->SetFloat("u_Light.outerCutOff", -1.0f);
+				shader->SetInt("u_SpotLightCount", 1);
+				spotLight->Bind(shader);
 			}
-			else if (light->GetType() == Light::Point) 
-			{
-				Ref<PointLight> pLight = std::dynamic_pointer_cast<PointLight>(light);
-				shader->SetFloat("u_Light.constant", pLight->GetConstant());
-				shader->SetFloat("u_Light.linear", pLight->GetLinear());
-				shader->SetFloat("u_Light.quadratic", pLight->GetQuadratic());
-
-				shader->SetFloat3("u_Light.direction", { 1.0f,0.0f,0.0f });
-				shader->SetFloat("u_Light.cutOff", -1.0f);
-				shader->SetFloat("u_Light.outerCutOff", -1.0f);
-			}
-			else
-			{
-				Ref<SpotLight> sLight = std::dynamic_pointer_cast<SpotLight>(light);
-				shader->SetFloat("u_Light.constant", sLight->GetConstant());
-				shader->SetFloat("u_Light.linear", sLight->GetLinear());
-				shader->SetFloat("u_Light.quadratic", sLight->GetQuadratic());
-				shader->SetFloat3("u_Light.direction", sLight->GetDirection());
-				shader->SetFloat("u_Light.cutOff", sLight->GetCutOff());
-				shader->SetFloat("u_Light.outerCutOff", sLight->GetOuterCutOff());
-			}*/
 		}
 	}
 

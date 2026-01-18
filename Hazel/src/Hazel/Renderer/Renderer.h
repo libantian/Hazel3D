@@ -19,7 +19,8 @@ namespace Hazel {
 		static void BeginScene(
 			const Camera& camera,
 			const Ref<DirectionalLight>& directionalLight = nullptr,
-			const std::vector<Ref<PointLight>>& pointLights = {}
+			const std::vector<Ref<PointLight>>& pointLights = {},
+			const Ref<SpotLight>& spotLight = nullptr
 		);
 		static void EndScene();
 
