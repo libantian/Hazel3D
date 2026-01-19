@@ -21,19 +21,24 @@ namespace Hazel {
 
 	}
 
-	void Material::SetDiffuseMap(Ref<Texture2D> texture)
-	{
-		m_DiffuseMap = texture;
-	}
 
-	void Material::SetSpecularMap(Ref<Texture2D> texture)
-	{
-		m_SpecularMap = texture;
-	}
 
-	void Material::SetEmissionMap(Ref<Texture2D> texture)
+	void Material::SetTextureMap(Ref<Texture2D> texture, Texture::Type type)
 	{
-		m_EmissionMap = texture;
+		switch (type)
+		{
+		case Texture::Diffuse:
+			SetDiffuseMap(texture);
+			break;
+		case Texture::Specular:
+			SetSpecularMap(texture);
+			break;
+		case Texture::Emission:
+			SetEmissionMap(texture);
+			break;
+		default:
+			HZ_CORE_ASSERT(false, "Unknown texture type!");
+		}
 	}
 
 	void Material::Bind(const Ref<Shader>& shader)

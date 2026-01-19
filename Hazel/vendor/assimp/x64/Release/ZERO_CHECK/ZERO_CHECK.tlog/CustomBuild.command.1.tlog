@@ -1,0 +1,10 @@
+^F:\HAZEL3D\HAZEL3D\HAZEL\VENDOR\ASSIMP\CMAKEFILES\95EB492D81EF95140A4A15EB2C83C7A0\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SF:/Hazel3D/Hazel3D/Hazel/vendor/assimp -BF:/Hazel3D/Hazel3D/Hazel/vendor/assimp --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file F:/Hazel3D/Hazel3D/Hazel/vendor/assimp/Assimp.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

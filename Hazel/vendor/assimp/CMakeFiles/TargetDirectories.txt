@@ -1,0 +1,13 @@
+F:/Hazel3D/Hazel3D/Hazel/vendor/assimp/CMakeFiles/uninstall.dir
+F:/Hazel3D/Hazel3D/Hazel/vendor/assimp/CMakeFiles/UpdateAssimpLibsDebugSymbolsAndDLLs.dir
+F:/Hazel3D/Hazel3D/Hazel/vendor/assimp/CMakeFiles/INSTALL.dir
+F:/Hazel3D/Hazel3D/Hazel/vendor/assimp/CMakeFiles/ALL_BUILD.dir
+F:/Hazel3D/Hazel3D/Hazel/vendor/assimp/CMakeFiles/ZERO_CHECK.dir
+F:/Hazel3D/Hazel3D/Hazel/vendor/assimp/contrib/zlib/CMakeFiles/zlibstatic.dir
+F:/Hazel3D/Hazel3D/Hazel/vendor/assimp/contrib/zlib/CMakeFiles/INSTALL.dir
+F:/Hazel3D/Hazel3D/Hazel/vendor/assimp/contrib/zlib/CMakeFiles/ALL_BUILD.dir
+F:/Hazel3D/Hazel3D/Hazel/vendor/assimp/code/CMakeFiles/assimp.dir
+F:/Hazel3D/Hazel3D/Hazel/vendor/assimp/code/CMakeFiles/INSTALL.dir
+F:/Hazel3D/Hazel3D/Hazel/vendor/assimp/test/CMakeFiles/unit.dir
+F:/Hazel3D/Hazel3D/Hazel/vendor/assimp/test/CMakeFiles/INSTALL.dir
+F:/Hazel3D/Hazel3D/Hazel/vendor/assimp/test/headercheck/CMakeFiles/INSTALL.dir

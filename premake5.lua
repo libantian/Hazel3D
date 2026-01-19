@@ -134,7 +134,8 @@ project "Sandbox"
 		"Hazel/vendor/spdlog/include",
 		"Hazel/src",
 		"Hazel/vendor",
-		"%{IncludeDir.glm}"
+		"%{IncludeDir.glm}",
+		"%{IncludeDir.assimp}",
 	}
 
 	links
@@ -149,7 +150,6 @@ project "Sandbox"
 		{
 			"HZ_PLATFORM_WINDOWS"
 		}
-
 		buildoptions { "/utf-8" }
 
 	filter "configurations:Debug"
