@@ -18,6 +18,7 @@ IncludeDir["Glad"] = "Hazel/vendor/Glad/include"
 IncludeDir["ImGui"] = "Hazel/vendor/imgui"
 IncludeDir["glm"] = "Hazel/vendor/glm"
 IncludeDir["stb_image"] = "Hazel/vendor/stb_image"
+IncludeDir["assimp"] = "Hazel/vendor/assimp/include"
 
 include "Hazel/vendor/GLFW"
 include "Hazel/vendor/Glad"
@@ -44,6 +45,7 @@ project "Hazel"
 		"%{prj.name}/vendor/stb_image/**.cpp",
 		"%{prj.name}/vendor/glm/glm/**.hpp",
 		"%{prj.name}/vendor/glm/glm/**.inl",
+		"%{prj.name}/assets/shaders/**"
 	}
 
 	defines
@@ -58,8 +60,14 @@ project "Hazel"
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.ImGui}",
+		"%{IncludeDir.glm}",
 		"%{IncludeDir.stb_image}",
-		"%{IncludeDir.glm}"
+		"%{IncludeDir.assimp}"
+	}
+
+	libdirs
+	{
+		"Hazel/vendor/assimp/lib/Release"
 	}
 
 	links 
@@ -67,6 +75,7 @@ project "Hazel"
 		"GLFW",
 		"Glad",
 		"ImGui",
+		"assimp-vc143-mt.lib",
 		"opengl32.lib"
 	}
 
@@ -79,9 +88,7 @@ project "Hazel"
 			"HZ_BUILD_DLL",
 			"GLFW_INCLUDE_NONE"
 		}
-
 		buildoptions { "/utf-8" }
-
 
 	filter "configurations:Debug"
 		defines "HZ_DEBUG"
@@ -108,10 +115,18 @@ project "Sandbox"
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
+	debugdir "$(SolutionDir)"
+
 	files
 	{
 		"%{prj.name}/src/**.h",
-		"%{prj.name}/src/**.cpp"
+		"%{prj.name}/src/**.cpp",
+	}
+
+	removefiles
+	{
+		"%{prj.name}/src/Sandbox2D.cpp",
+		"%{prj.name}/src/Sandbox2D.h"
 	}
 
 	includedirs
@@ -136,7 +151,6 @@ project "Sandbox"
 		}
 
 		buildoptions { "/utf-8" }
-
 
 	filter "configurations:Debug"
 		defines "HZ_DEBUG"
