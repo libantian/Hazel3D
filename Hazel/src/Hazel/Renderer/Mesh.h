@@ -21,8 +21,8 @@ namespace Hazel {
 		{
 			SetupMesh();
 		}
-		inline Ref<Material> GetMaterial() { return m_Material; }
-		inline Ref<VertexArray> GetVertexArray() { return m_VertexArray; }
+		inline Ref<Material> GetMaterial() const { return m_Material; }
+		inline Ref<VertexArray> GetVertexArray() const { return m_VertexArray; }
 
 	private:
 		void SetupMesh();

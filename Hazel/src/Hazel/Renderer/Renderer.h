@@ -8,6 +8,8 @@
 #include "Material.h"
 #include "Light.h"
 #include "Mesh.h"
+#include "Model.h"
+
 namespace Hazel {
 
 	class Renderer
@@ -25,7 +27,11 @@ namespace Hazel {
 		static void EndScene();
 
 		static void Submit(
-			const Ref<Mesh>& mesh,
+			const Mesh& mesh,
+			const glm::mat4& modelTransform = glm::mat4(1.0f)
+		);
+		static void Submit(
+			const Model& model,
 			const glm::mat4& modelTransform = glm::mat4(1.0f)
 		);
 		// submit a light source to draw
