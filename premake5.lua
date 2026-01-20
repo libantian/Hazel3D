@@ -123,11 +123,11 @@ project "Sandbox"
 		"%{prj.name}/src/**.cpp",
 	}
 
-	removefiles
-	{
-		"%{prj.name}/src/Sandbox2D.cpp",
-		"%{prj.name}/src/Sandbox2D.h"
-	}
+	-- removefiles
+	-- {
+	-- 	"%{prj.name}/src/Sandbox2D.cpp",
+	-- 	"%{prj.name}/src/Sandbox2D.h"
+	-- }
 
 	includedirs
 	{
