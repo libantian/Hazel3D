@@ -17,6 +17,15 @@ namespace Hazel {
 			LoadModel(path);
 		}
 		const std::vector<Mesh>& GetMeshes() const { return m_Meshes; }
+		const std::string& GetDirectory() const { return m_Directory; }
+
+		// Reload model from a new file path (clears existing mesh data)
+		void Load(const std::string& path)
+		{
+			m_Meshes.clear();
+			m_Directory.clear();
+			LoadModel(path);
+		}
 	private:
 		void LoadModel(const std::string& path);
 		void ProcessNode(aiNode* node, const aiScene* scene);

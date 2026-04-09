@@ -1,0 +1,7 @@
+# Material for simplified model
+newmtl material
+Ka 0.8 0.8 0.8
+Kd 0.8 0.8 0.8
+Ks 1.0 1.0 1.0
+Ns 32.0
+map_Kd texture.png

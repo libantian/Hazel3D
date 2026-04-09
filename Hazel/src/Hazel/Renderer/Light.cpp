@@ -41,3 +41,4 @@ namespace Hazel {
 		shader->SetFloat("u_SpotLight.outerCutOff", GetOuterCutOff());
 	}
 }
+

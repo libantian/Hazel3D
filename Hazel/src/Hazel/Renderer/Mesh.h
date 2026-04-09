@@ -34,6 +34,8 @@ namespace Hazel {
 		}
 		inline Ref<Material> GetMaterial() const { return m_Material; }
 		inline Ref<VertexArray> GetVertexArray() const { return m_VertexArray; }
+		inline const std::vector<Vertex>& GetVertices() const { return m_Vertices; }
+		inline const std::vector<uint32_t>& GetIndices() const { return m_Indices; }
 
 	private:
 		void SetupMesh();
@@ -47,8 +49,5 @@ namespace Hazel {
 		Ref<VertexBuffer>m_VertexBuffer;
 		Ref<IndexBuffer> m_IndexBuffer;
 	};
-
-
-	
 
 }

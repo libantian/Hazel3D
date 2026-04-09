@@ -5,6 +5,9 @@
 #include "imgui/imgui.h"
 
 #include <memory>
+#include <cstdint>
+#include <string>
+#include <vector>
 
 class Sandbox3D : public Hazel::Layer
 {
@@ -24,8 +27,32 @@ private:
 	bool m_isPerspective = true;
 
 	Hazel::Ref<Hazel::Model> m_Model;
+	std::string m_ModelPath = "Sandbox/assets/models/nanosuit/nanosuit.obj";
 	glm::vec3 m_ModelPos = { 0.0f, -1.3f, 0.0f };
 	float m_ModelScale = 0.2f;
+
+	struct MeshLODData
+	{
+		std::string Name;
+		std::string MaterialName;
+		Hazel::Ref<Hazel::Material> Material;
+		std::vector<Hazel::Vertex> Vertices;
+		std::vector<uint32_t> Indices;
+	};
+	std::vector<MeshLODData> m_SourceMeshes;
+	std::vector<MeshLODData> m_CurrentLodMeshes;
+	std::vector<Hazel::Mesh> m_RenderMeshes;
+	Hazel::Ref<Hazel::Material> m_FallbackMaterial;
+
+	float m_VertexKeepPercent = 100.0f;
+	float m_AppliedVertexKeepPercent = 100.0f;
+	bool m_ModelVisible = false;
+	bool m_LodDirty = true;
+	std::string m_LodStatus = "Model loaded. Click Render to show.";
+	std::string m_ExportStatus = "Not exported yet.";
+	char m_ExportPathBuffer[260] = "Sandbox/assets/models/simplified_model.obj";
+	std::string m_OriginalMtlFileName;
+	std::vector<std::string> m_OriginalUseMtlOrder;
 
 	Hazel::Ref<Hazel::DirectionalLight> m_DirectionalLight;
 	struct {
@@ -64,5 +91,13 @@ private:
 		float cutOff = 12.5f;
 		float epsilon = 5.0f;
 	}m_SpotLightProp;
-	
+
+private:
+	void ParseOriginalObjMaterialInfo();
+	void CaptureSourceMeshes();
+	void BuildLodMeshes(float keepPercent);
+	bool ExportCurrentLodObj(const std::string& outputObjPath);
+	void MarkLodDirtyAndPause();
+	static uint64_t CountTotalVertices(const std::vector<MeshLODData>& meshes);
+	static uint64_t CountTotalTriangles(const std::vector<MeshLODData>& meshes);
 };
