@@ -23,6 +23,10 @@ namespace Hazel {
 		{
 			return s_Instance->LoadTextureImpl(filepath, name);
 		}
+		static void ClearTextures()
+		{
+			s_Instance->m_Textures.clear();
+		}
 		static bool IsTextureExist(const std::string& name)
 		{
 			return s_Instance->IsTextureExistImpl(name);

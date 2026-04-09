@@ -6,6 +6,7 @@
 
 #include <memory>
 #include <cstdint>
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -28,6 +29,10 @@ private:
 
 	Hazel::Ref<Hazel::Model> m_Model;
 	std::string m_ModelPath = "Sandbox/assets/models/nanosuit/nanosuit.obj";
+	std::filesystem::path m_ImportedFolderPath;
+	std::vector<std::string> m_AvailableObjFiles;
+	int m_SelectedObjIndex = 0;
+	std::string m_ImportStatus = "No folder imported.";
 	glm::vec3 m_ModelPos = { 0.0f, -1.3f, 0.0f };
 	float m_ModelScale = 0.2f;
 
@@ -98,6 +103,15 @@ private:
 	void BuildLodMeshes(float keepPercent);
 	bool ExportCurrentLodObj(const std::string& outputObjPath);
 	void MarkLodDirtyAndPause();
+	bool OpenImportFolderDialogAndScan();
+	void ScanImportFolder(const std::filesystem::path& folderPath);
+	bool LoadSelectedModelFromImportedFolder(bool resetLodState = true);
+	void ResetLodStateForNewModel();
+	static std::string NormalizePathForUi(const std::filesystem::path& path);
+	static std::string ToLower(std::string value);
+	static std::string PickMainTextureFromFolder(const std::filesystem::path& folderPath, const std::string& objectNameLower);
+	static bool FileNameContainsTypeHint(const std::string& fileNameLower, const std::vector<std::string>& hints);
+	bool ExportTexturesForCurrentModel(const std::filesystem::path& outputObjPath);
 	static uint64_t CountTotalVertices(const std::vector<MeshLODData>& meshes);
 	static uint64_t CountTotalTriangles(const std::vector<MeshLODData>& meshes);
 };

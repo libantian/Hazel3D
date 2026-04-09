@@ -5,10 +5,15 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <algorithm>
+#include <cctype>
 #include <exception>
 #include <filesystem>
 #include <fstream>
 #include <sstream>
+#include <unordered_set>
+
+#include <Windows.h>
+#include <ShlObj.h>
 
 namespace
 {
@@ -37,13 +42,20 @@ Sandbox3D::Sandbox3D() :
 
 void Sandbox3D::OnAttach()
 {
-	m_Model = Hazel::CreateRef<Hazel::Model>(m_ModelPath);
 	m_FallbackMaterial = Hazel::CreateRef<Hazel::Material>();
-	ParseOriginalObjMaterialInfo();
-	CaptureSourceMeshes();
-	m_ModelVisible = false;
-	m_LodDirty = true;
-	m_LodStatus = "Model imported. Click Render to generate and display LOD mesh.";
+
+	m_ImportedFolderPath = std::filesystem::path(m_ModelPath).parent_path();
+	ScanImportFolder(m_ImportedFolderPath);
+	LoadSelectedModelFromImportedFolder(false);
+	if (!m_Model)
+	{
+		m_Model = Hazel::CreateRef<Hazel::Model>(m_ModelPath);
+		ParseOriginalObjMaterialInfo();
+		CaptureSourceMeshes();
+		m_ModelVisible = false;
+		m_LodDirty = true;
+		m_LodStatus = "Model imported. Click Render to generate and display LOD mesh.";
+	}
 
 	// light source
 
@@ -226,6 +238,38 @@ void Sandbox3D::OnDetach()
 void Sandbox3D::OnImGuiRender()
 {
 	ImGui::Begin("LOD Simplification");
+	if (ImGui::Button("Import OBJ"))
+		OpenImportFolderDialogAndScan();
+
+	if (!m_AvailableObjFiles.empty())
+	{
+		if (m_SelectedObjIndex < 0 || m_SelectedObjIndex >= (int)m_AvailableObjFiles.size())
+			m_SelectedObjIndex = 0;
+
+		std::vector<const char*> items;
+		items.reserve(m_AvailableObjFiles.size());
+		for (const auto& obj : m_AvailableObjFiles)
+			items.push_back(obj.c_str());
+
+		ImGui::PushItemWidth(340.0f);
+		if (ImGui::Combo("OBJ File", &m_SelectedObjIndex, items.data(), (int)items.size()))
+			m_LodStatus = "OBJ selection changed. Click Load Selected OBJ.";
+		ImGui::PopItemWidth();
+
+		ImGui::SameLine();
+		if (ImGui::Button("Load Selected OBJ"))
+			LoadSelectedModelFromImportedFolder(true);
+	}
+	else
+	{
+		ImGui::Text("OBJ File: None");
+	}
+
+	ImGui::TextWrapped("Import Folder: %s",
+		m_ImportedFolderPath.empty() ? "(none)" : NormalizePathForUi(m_ImportedFolderPath).c_str());
+	ImGui::TextWrapped("Import Status: %s", m_ImportStatus.c_str());
+	ImGui::Separator();
+
 	ImGui::Text("Model Path: %s", m_ModelPath.c_str());
 	ImGui::Text("Source Meshes: %d", (int)m_SourceMeshes.size());
 	ImGui::Separator();
@@ -353,6 +397,33 @@ void Sandbox3D::ParseOriginalObjMaterialInfo()
 				continue;
 			if (m_OriginalUseMtlOrder.empty() || m_OriginalUseMtlOrder.back() != materialName)
 				m_OriginalUseMtlOrder.push_back(materialName);
+		}
+	}
+
+	if (m_OriginalMtlFileName.empty())
+	{
+		const std::filesystem::path sameStemMtl = std::filesystem::path(m_ModelPath).replace_extension(".mtl");
+		if (std::filesystem::exists(sameStemMtl))
+			m_OriginalMtlFileName = sameStemMtl.filename().string();
+	}
+
+	if (m_OriginalUseMtlOrder.empty() && !m_OriginalMtlFileName.empty())
+	{
+		const std::filesystem::path mtlPath = std::filesystem::path(m_ModelPath).parent_path() / m_OriginalMtlFileName;
+		std::ifstream mtlInput(mtlPath);
+		if (mtlInput.is_open())
+		{
+			std::string mtlLine;
+			while (std::getline(mtlInput, mtlLine))
+			{
+				if (StartsWith(mtlLine, "newmtl "))
+				{
+					const std::string materialName = Trim(mtlLine.substr(7));
+					if (!materialName.empty())
+						m_OriginalUseMtlOrder.push_back(materialName);
+					break;
+				}
+			}
 		}
 	}
 }
@@ -510,6 +581,8 @@ bool Sandbox3D::ExportCurrentLodObj(const std::string& outputObjPath)
 		}
 
 		const bool ok = OBJExporter::Export(objPath.string(), subMeshes, mtlFileForObj);
+		if (ok)
+			ExportTexturesForCurrentModel(objPath);
 		m_ExportStatus = ok
 			? "Exported: " + objPath.string()
 			: "Export failed when writing OBJ file.";
@@ -527,6 +600,312 @@ void Sandbox3D::MarkLodDirtyAndPause()
 	m_LodDirty = true;
 	m_ModelVisible = false;
 	m_LodStatus = "LOD parameter changed. Rendering paused. Click Render to apply.";
+}
+
+bool Sandbox3D::OpenImportFolderDialogAndScan()
+{
+	const HRESULT coInit = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+
+	BROWSEINFOW bi = {};
+	bi.lpszTitle = L"Select OBJ Model Folder";
+	bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE | BIF_USENEWUI;
+
+	LPITEMIDLIST pidl = SHBrowseForFolderW(&bi);
+	if (!pidl)
+	{
+		if (SUCCEEDED(coInit)) CoUninitialize();
+		m_ImportStatus = "Folder import cancelled.";
+		return false;
+	}
+
+	wchar_t selectedPath[MAX_PATH] = {};
+	const bool gotPath = SHGetPathFromIDListW(pidl, selectedPath) == TRUE;
+	CoTaskMemFree(pidl);
+	if (SUCCEEDED(coInit)) CoUninitialize();
+
+	if (!gotPath)
+	{
+		m_ImportStatus = "Failed to read selected folder path.";
+		return false;
+	}
+
+	ScanImportFolder(std::filesystem::path(selectedPath));
+	if (!m_AvailableObjFiles.empty())
+	{
+		m_ImportStatus = "Folder scanned. Select an OBJ and click Load Selected OBJ.";
+		return true;
+	}
+
+	return false;
+}
+
+void Sandbox3D::ScanImportFolder(const std::filesystem::path& folderPath)
+{
+	m_AvailableObjFiles.clear();
+	m_SelectedObjIndex = 0;
+	m_ImportedFolderPath.clear();
+
+	try
+	{
+		if (folderPath.empty() || !std::filesystem::exists(folderPath) || !std::filesystem::is_directory(folderPath))
+		{
+			m_ImportStatus = "Selected path is not a valid folder.";
+			return;
+		}
+
+		m_ImportedFolderPath = folderPath;
+		for (const auto& entry : std::filesystem::directory_iterator(folderPath))
+		{
+			if (!entry.is_regular_file())
+				continue;
+			std::string ext = ToLower(entry.path().extension().string());
+			if (ext == ".obj")
+				m_AvailableObjFiles.push_back(entry.path().filename().string());
+		}
+		std::sort(m_AvailableObjFiles.begin(), m_AvailableObjFiles.end());
+
+		if (m_AvailableObjFiles.empty())
+		{
+			m_ImportStatus = "No OBJ file found in selected folder.";
+			return;
+		}
+
+		int nanosuitIndex = 0;
+		for (int i = 0; i < (int)m_AvailableObjFiles.size(); ++i)
+		{
+			if (ToLower(m_AvailableObjFiles[i]).find("nanosuit") != std::string::npos)
+			{
+				nanosuitIndex = i;
+				break;
+			}
+		}
+		m_SelectedObjIndex = nanosuitIndex;
+
+		size_t mtlCount = 0;
+		size_t pngCount = 0;
+		for (const auto& entry : std::filesystem::directory_iterator(folderPath))
+		{
+			if (!entry.is_regular_file())
+				continue;
+			std::string ext = ToLower(entry.path().extension().string());
+			if (ext == ".mtl") ++mtlCount;
+			if (ext == ".png") ++pngCount;
+		}
+
+		std::ostringstream status;
+		status << "Folder scanned. OBJ: " << m_AvailableObjFiles.size()
+			<< ", MTL: " << mtlCount
+			<< ", PNG: " << pngCount
+			<< ".";
+		m_ImportStatus = status.str();
+	}
+	catch (const std::exception& e)
+	{
+		m_ImportStatus = std::string("Scan failed: ") + e.what();
+	}
+}
+
+bool Sandbox3D::LoadSelectedModelFromImportedFolder(bool resetLodState)
+{
+	if (m_AvailableObjFiles.empty() || m_ImportedFolderPath.empty())
+	{
+		m_ImportStatus = "No import folder/OBJ available.";
+		return false;
+	}
+	if (m_SelectedObjIndex < 0 || m_SelectedObjIndex >= (int)m_AvailableObjFiles.size())
+	{
+		m_ImportStatus = "Invalid OBJ selection index.";
+		return false;
+	}
+
+	try
+	{
+		const std::filesystem::path objPath = m_ImportedFolderPath / m_AvailableObjFiles[m_SelectedObjIndex];
+		m_ModelPath = objPath.generic_string();
+
+		// prevent stale texture bindings across model folders
+		Hazel::AssetsManager::ClearTextures();
+
+		m_Model = Hazel::CreateRef<Hazel::Model>(m_ModelPath);
+		ParseOriginalObjMaterialInfo();
+		CaptureSourceMeshes();
+		if (m_SourceMeshes.empty())
+		{
+			m_ImportStatus = "OBJ loaded but no mesh data found. Check OBJ/MTL integrity.";
+			return false;
+		}
+
+		if (resetLodState)
+			ResetLodStateForNewModel();
+
+		size_t pngCount = 0;
+		for (const auto& entry : std::filesystem::directory_iterator(m_ImportedFolderPath))
+		{
+			if (entry.is_regular_file() && ToLower(entry.path().extension().string()) == ".png")
+				++pngCount;
+		}
+
+		std::ostringstream status;
+		status << "Loaded OBJ: " << objPath.filename().string()
+			<< ". Material and texture resources parsed from folder."
+			<< " PNG detected: " << pngCount << ".";
+		m_ImportStatus = status.str();
+		return true;
+	}
+	catch (const std::exception& e)
+	{
+		m_ImportStatus = std::string("Load failed: ") + e.what();
+		return false;
+	}
+}
+
+void Sandbox3D::ResetLodStateForNewModel()
+{
+	m_VertexKeepPercent = 100.0f;
+	m_AppliedVertexKeepPercent = 100.0f;
+	m_ModelVisible = false;
+	m_LodDirty = true;
+	m_CurrentLodMeshes = m_SourceMeshes;
+	m_RenderMeshes.clear();
+	m_ExportStatus = "Not exported yet.";
+	m_LodStatus = "New model imported. Click Render to display.";
+}
+
+std::string Sandbox3D::NormalizePathForUi(const std::filesystem::path& path)
+{
+	return path.generic_string();
+}
+
+std::string Sandbox3D::ToLower(std::string value)
+{
+	std::transform(value.begin(), value.end(), value.begin(), [](unsigned char c) { return (char)std::tolower(c); });
+	return value;
+}
+
+bool Sandbox3D::FileNameContainsTypeHint(const std::string& fileNameLower, const std::vector<std::string>& hints)
+{
+	for (const auto& hint : hints)
+	{
+		if (fileNameLower.find(hint) != std::string::npos)
+			return true;
+	}
+	return false;
+}
+
+std::string Sandbox3D::PickMainTextureFromFolder(const std::filesystem::path& folderPath, const std::string& objectNameLower)
+{
+	try
+	{
+		std::vector<std::filesystem::path> pngFiles;
+		for (const auto& entry : std::filesystem::directory_iterator(folderPath))
+		{
+			if (!entry.is_regular_file())
+				continue;
+			if (ToLower(entry.path().extension().string()) == ".png")
+				pngFiles.push_back(entry.path());
+		}
+		if (pngFiles.empty())
+			return "";
+
+		const std::vector<std::string> diffuseHints = { "diff", "dif", "albedo", "basecolor", "base_color", "color", "col" };
+
+		for (const auto& path : pngFiles)
+		{
+			std::string nameLower = ToLower(path.filename().string());
+			if (!objectNameLower.empty() && nameLower.find(objectNameLower) != std::string::npos
+				&& FileNameContainsTypeHint(nameLower, diffuseHints))
+				return path.filename().string();
+		}
+		for (const auto& path : pngFiles)
+		{
+			std::string nameLower = ToLower(path.filename().string());
+			if (FileNameContainsTypeHint(nameLower, diffuseHints))
+				return path.filename().string();
+		}
+		return pngFiles.front().filename().string();
+	}
+	catch (...)
+	{
+		return "";
+	}
+}
+
+bool Sandbox3D::ExportTexturesForCurrentModel(const std::filesystem::path& outputObjPath)
+{
+	if (m_ImportedFolderPath.empty() || !std::filesystem::exists(m_ImportedFolderPath))
+		return false;
+
+	bool copiedAny = false;
+	try
+	{
+		for (const auto& entry : std::filesystem::directory_iterator(m_ImportedFolderPath))
+		{
+			if (!entry.is_regular_file())
+				continue;
+			if (ToLower(entry.path().extension().string()) != ".png")
+				continue;
+
+			const std::filesystem::path target = outputObjPath.parent_path() / entry.path().filename();
+			if (entry.path().lexically_normal() == target.lexically_normal())
+				continue;
+
+			std::filesystem::copy_file(entry.path(), target, std::filesystem::copy_options::overwrite_existing);
+			copiedAny = true;
+		}
+
+		// If source OBJ has no .mtl, emit a simple compatible one and patch mtllib/usemtl.
+		if (m_OriginalMtlFileName.empty())
+		{
+			const std::string objNameLower = ToLower(outputObjPath.stem().string());
+			const std::string diffuseTexture = PickMainTextureFromFolder(m_ImportedFolderPath, objNameLower);
+			if (!diffuseTexture.empty())
+			{
+				const std::filesystem::path mtlPath = outputObjPath.parent_path() / (outputObjPath.stem().string() + ".mtl");
+				{
+					std::ofstream mtl(mtlPath);
+					mtl << "newmtl AutoMaterial\n";
+					mtl << "Ka 0.200000 0.200000 0.200000\n";
+					mtl << "Kd 0.800000 0.800000 0.800000\n";
+					mtl << "Ks 0.100000 0.100000 0.100000\n";
+					mtl << "Ns 32.000000\n";
+					mtl << "illum 2\n";
+					mtl << "map_Kd " << diffuseTexture << "\n";
+				}
+
+				std::ifstream inObj(outputObjPath);
+				if (inObj.is_open())
+				{
+					std::vector<std::string> lines;
+					std::string line;
+					bool hasMtllib = false;
+					bool hasUsemtl = false;
+					while (std::getline(inObj, line))
+					{
+						if (StartsWith(line, "mtllib ")) hasMtllib = true;
+						if (StartsWith(line, "usemtl ")) hasUsemtl = true;
+						lines.push_back(line);
+					}
+					inObj.close();
+
+					std::ofstream outObj(outputObjPath, std::ios::trunc);
+					if (outObj.is_open())
+					{
+						if (!hasMtllib)
+							outObj << "mtllib " << mtlPath.filename().string() << "\n";
+						if (!hasUsemtl)
+							outObj << "usemtl AutoMaterial\n";
+						for (const auto& l : lines)
+							outObj << l << "\n";
+					}
+				}
+			}
+		}
+	}
+	catch (...)
+	{
+		return copiedAny;
+	}
+	return copiedAny;
 }
 
 uint64_t Sandbox3D::CountTotalVertices(const std::vector<MeshLODData>& meshes)
